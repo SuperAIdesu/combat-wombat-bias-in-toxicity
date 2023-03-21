@@ -10,7 +10,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 
 from tqdm import tqdm
-from keras.preprocessing.sequence import pad_sequences
+from keras_preprocessing.sequence import pad_sequences
 
 import torch
 from torch import nn
@@ -114,6 +114,10 @@ if __name__ == "__main__":
 
     logging.info("Buliding targets and weights ...")
     iden = train[IDENTITY_COLUMNS].fillna(0).values
+    # 11 targets
+    # + 9 main identites
+    # + max value for any out of 9 identities columns
+    # + binary column that indecates whether at least one identity was mentioned
     subgroup_target = np.hstack(
         [
             (iden >= 0.5).any(axis=1, keepdims=True).astype(np.int),
@@ -121,6 +125,7 @@ if __name__ == "__main__":
             iden.max(axis=1, keepdims=True),
         ]
     )
+    # weights for the above targets
     sub_target_weigths = (
         ~train[IDENTITY_COLUMNS].isna().values.any(axis=1, keepdims=True)
     ).astype(np.int)
@@ -157,9 +162,9 @@ if __name__ == "__main__":
         return torch.tensor(
             np.hstack(
                 [
-                    y[:, None],
-                    weights[:, None],
-                    y_aux_train,
+                    y[:, None], # 1 main target
+                    weights[:, None], # weight for main target
+                    y_aux_train, # 6 aux targets
                     subgroup_target,
                     sub_target_weigths,
                 ]
@@ -193,53 +198,53 @@ if __name__ == "__main__":
     y_train_torch = get_y_train_torch(weights)
     databunch = get_databunch(y_train_torch)
 
-    logging.info("training model 1: para, rawl, w2v...")
-    embedding_matrix = np.concatenate(
-        [para_matrix, crawl_matrix, w2v_matrix, char_matrix], axis=1
-    )
-    seed_everything(42)
-    model = NeuralNet(embedding_matrix, output_aux_sub=subgroup_target.shape[1])
-    learn = Learner(databunch, model, loss_func=custom_loss)
-    cb = OneCycleScheduler(learn, lr_max=0.001)
-    learn.callbacks.append(cb)
-    learn.fit(EPOCHS)
-    save_nn_without_embedding_weights(learn.model, "./models/Notebook_100_1.bin")
+    # logging.info("training model 1: para, rawl, w2v...")
+    # embedding_matrix = np.concatenate(
+    #     [para_matrix, crawl_matrix, w2v_matrix, char_matrix], axis=1
+    # )
+    # seed_everything(42)
+    # model = NeuralNet(embedding_matrix, output_aux_sub=subgroup_target.shape[1])
+    # learn = Learner(databunch, model, loss_func=custom_loss)
+    # cb = OneCycleScheduler(learn, lr_max=0.001)
+    # learn.callbacks.append(cb)
+    # learn.fit(EPOCHS)
+    # save_nn_without_embedding_weights(learn.model, "./models/Notebook_100_1.bin")
 
-    logging.info("training model 2: glove, crawl, w2v...")
-    embedding_matrix = np.concatenate(
-        [glove_matrix, crawl_matrix, w2v_matrix, char_matrix], axis=1
-    )
-    seed_everything(43)
-    model = NeuralNet(embedding_matrix, output_aux_sub=subgroup_target.shape[1])
-    learn = Learner(databunch, model, loss_func=custom_loss)
-    cb = OneCycleScheduler(learn, lr_max=0.001)
-    learn.callbacks.append(cb)
-    learn.fit(EPOCHS)
-    save_nn_without_embedding_weights(learn.model, "./models/Notebook_100_2.bin")
+    # logging.info("training model 2: glove, crawl, w2v...")
+    # embedding_matrix = np.concatenate(
+    #     [glove_matrix, crawl_matrix, w2v_matrix, char_matrix], axis=1
+    # )
+    # seed_everything(43)
+    # model = NeuralNet(embedding_matrix, output_aux_sub=subgroup_target.shape[1])
+    # learn = Learner(databunch, model, loss_func=custom_loss)
+    # cb = OneCycleScheduler(learn, lr_max=0.001)
+    # learn.callbacks.append(cb)
+    # learn.fit(EPOCHS)
+    # save_nn_without_embedding_weights(learn.model, "./models/Notebook_100_2.bin")
 
-    logging.info("training model 3: glove, para, w2v...")
-    embedding_matrix = np.concatenate(
-        [glove_matrix, para_matrix, w2v_matrix, char_matrix], axis=1
-    )
-    seed_everything(44)
-    model = NeuralNet(embedding_matrix, output_aux_sub=subgroup_target.shape[1])
-    learn = Learner(databunch, model, loss_func=custom_loss)
-    cb = OneCycleScheduler(learn, lr_max=0.001)
-    learn.callbacks.append(cb)
-    learn.fit(EPOCHS)
-    save_nn_without_embedding_weights(learn.model, "./models/Notebook_100_3.bin")
+    # logging.info("training model 3: glove, para, w2v...")
+    # embedding_matrix = np.concatenate(
+    #     [glove_matrix, para_matrix, w2v_matrix, char_matrix], axis=1
+    # )
+    # seed_everything(44)
+    # model = NeuralNet(embedding_matrix, output_aux_sub=subgroup_target.shape[1])
+    # learn = Learner(databunch, model, loss_func=custom_loss)
+    # cb = OneCycleScheduler(learn, lr_max=0.001)
+    # learn.callbacks.append(cb)
+    # learn.fit(EPOCHS)
+    # save_nn_without_embedding_weights(learn.model, "./models/Notebook_100_3.bin")
 
-    logging.info("training model 4: glove, para, crawl...")
-    embedding_matrix = np.concatenate(
-        [glove_matrix, para_matrix, crawl_matrix, char_matrix], axis=1
-    )
-    seed_everything(45)
-    model = NeuralNet(embedding_matrix, output_aux_sub=subgroup_target.shape[1])
-    learn = Learner(databunch, model, loss_func=custom_loss)
-    cb = OneCycleScheduler(learn, lr_max=0.001)
-    learn.callbacks.append(cb)
-    learn.fit(EPOCHS)
-    save_nn_without_embedding_weights(learn.model, "./models/Notebook_100_4.bin")
+    # logging.info("training model 4: glove, para, crawl...")
+    # embedding_matrix = np.concatenate(
+    #     [glove_matrix, para_matrix, crawl_matrix, char_matrix], axis=1
+    # )
+    # seed_everything(45)
+    # model = NeuralNet(embedding_matrix, output_aux_sub=subgroup_target.shape[1])
+    # learn = Learner(databunch, model, loss_func=custom_loss)
+    # cb = OneCycleScheduler(learn, lr_max=0.001)
+    # learn.callbacks.append(cb)
+    # learn.fit(EPOCHS)
+    # save_nn_without_embedding_weights(learn.model, "./models/Notebook_100_4.bin")
 
     logging.info("training model 5: base ...")
     embedding_matrix = np.concatenate(
@@ -253,147 +258,147 @@ if __name__ == "__main__":
     learn.fit(EPOCHS)
     save_nn_without_embedding_weights(learn.model, "./models/Notebook_100_5.bin")
 
-    logging.info("training model 6: base + homosexual boost ...")
-    weights = np.ones(len(train))
-    weights += (iden >= 0.5).any(1)
-    weights += (train["target"].values >= 0.5) & (iden < 0.5).any(1)
-    weights += (train["target"].values < 0.5) & (iden >= 0.5).any(1)
-    weights += (
-        (
-            (train["target"].values >= 0.5).astype(bool).astype(np.int)
-            + (train["is_idententy"].values == 1)
-        )
-        .astype(bool)
-        .astype(np.int)
-    )
-    weights += (
-        (train[["homosexual_gay_or_lesbian"]].fillna(0).values >= 0.5)
-        .sum(axis=1)
-        .astype(bool)
-        .astype(np.int)
-    )
-    weights /= weights.mean()
-    y_train_torch = get_y_train_torch(weights)
-    databunch = get_databunch(y_train_torch)
-    model = NeuralNet(embedding_matrix, output_aux_sub=subgroup_target.shape[1])
-    learn = Learner(databunch, model, loss_func=custom_loss)
-    cb = OneCycleScheduler(learn, lr_max=0.001)
-    learn.callbacks.append(cb)
-    learn.fit(EPOCHS)
-    save_nn_without_embedding_weights(learn.model, "./models/Notebook_100_6.bin")
+    # logging.info("training model 6: base + homosexual boost ...")
+    # weights = np.ones(len(train))
+    # weights += (iden >= 0.5).any(1)
+    # weights += (train["target"].values >= 0.5) & (iden < 0.5).any(1)
+    # weights += (train["target"].values < 0.5) & (iden >= 0.5).any(1)
+    # weights += (
+    #     (
+    #         (train["target"].values >= 0.5).astype(bool).astype(np.int)
+    #         + (train["is_idententy"].values == 1)
+    #     )
+    #     .astype(bool)
+    #     .astype(np.int)
+    # )
+    # weights += (
+    #     (train[["homosexual_gay_or_lesbian"]].fillna(0).values >= 0.5)
+    #     .sum(axis=1)
+    #     .astype(bool)
+    #     .astype(np.int)
+    # )
+    # weights /= weights.mean()
+    # y_train_torch = get_y_train_torch(weights)
+    # databunch = get_databunch(y_train_torch)
+    # model = NeuralNet(embedding_matrix, output_aux_sub=subgroup_target.shape[1])
+    # learn = Learner(databunch, model, loss_func=custom_loss)
+    # cb = OneCycleScheduler(learn, lr_max=0.001)
+    # learn.callbacks.append(cb)
+    # learn.fit(EPOCHS)
+    # save_nn_without_embedding_weights(learn.model, "./models/Notebook_100_6.bin")
 
-    logging.info("training model 7: base + psychiatric boost ...")
-    weights = np.ones(len(train))
-    weights += (iden >= 0.5).any(1)
-    weights += (train["target"].values >= 0.5) & (iden < 0.5).any(1)
-    weights += (train["target"].values < 0.5) & (iden >= 0.5).any(1)
-    weights += (
-        (
-            (train["target"].values >= 0.5).astype(bool).astype(np.int)
-            + (train["is_idententy"].values == 1)
-        )
-        .astype(bool)
-        .astype(np.int)
-    )
-    weights += (
-        (train[["psychiatric_or_mental_illness"]].fillna(0).values >= 0.5)
-        .sum(axis=1)
-        .astype(bool)
-        .astype(np.int)
-    )
-    weights /= weights.mean()
-    y_train_torch = get_y_train_torch(weights)
-    databunch = get_databunch(y_train_torch)
-    model = NeuralNet(embedding_matrix, output_aux_sub=subgroup_target.shape[1])
-    learn = Learner(databunch, model, loss_func=custom_loss)
-    cb = OneCycleScheduler(learn, lr_max=0.001)
-    learn.callbacks.append(cb)
-    learn.fit(EPOCHS)
-    save_nn_without_embedding_weights(learn.model, "./models/Notebook_100_7.bin")
+    # logging.info("training model 7: base + psychiatric boost ...")
+    # weights = np.ones(len(train))
+    # weights += (iden >= 0.5).any(1)
+    # weights += (train["target"].values >= 0.5) & (iden < 0.5).any(1)
+    # weights += (train["target"].values < 0.5) & (iden >= 0.5).any(1)
+    # weights += (
+    #     (
+    #         (train["target"].values >= 0.5).astype(bool).astype(np.int)
+    #         + (train["is_idententy"].values == 1)
+    #     )
+    #     .astype(bool)
+    #     .astype(np.int)
+    # )
+    # weights += (
+    #     (train[["psychiatric_or_mental_illness"]].fillna(0).values >= 0.5)
+    #     .sum(axis=1)
+    #     .astype(bool)
+    #     .astype(np.int)
+    # )
+    # weights /= weights.mean()
+    # y_train_torch = get_y_train_torch(weights)
+    # databunch = get_databunch(y_train_torch)
+    # model = NeuralNet(embedding_matrix, output_aux_sub=subgroup_target.shape[1])
+    # learn = Learner(databunch, model, loss_func=custom_loss)
+    # cb = OneCycleScheduler(learn, lr_max=0.001)
+    # learn.callbacks.append(cb)
+    # learn.fit(EPOCHS)
+    # save_nn_without_embedding_weights(learn.model, "./models/Notebook_100_7.bin")
 
-    logging.info("training model 8: base + jewish boost ...")
-    weights = np.ones(len(train))
-    weights += (iden >= 0.5).any(1)
-    weights += (train["target"].values >= 0.5) & (iden < 0.5).any(1)
-    weights += (train["target"].values < 0.5) & (iden >= 0.5).any(1)
-    weights += (
-        (
-            (train["target"].values >= 0.5).astype(bool).astype(np.int)
-            + (train["is_idententy"].values == 1)
-        )
-        .astype(bool)
-        .astype(np.int)
-    )
-    weights += (
-        (train[["psychiatric_or_mental_illness"]].fillna(0).values >= 0.5)
-        .sum(axis=1)
-        .astype(bool)
-        .astype(np.int)
-    )
-    weights /= weights.mean()
-    y_train_torch = get_y_train_torch(weights)
-    databunch = get_databunch(y_train_torch)
-    model = NeuralNet(embedding_matrix, output_aux_sub=subgroup_target.shape[1])
-    learn = Learner(databunch, model, loss_func=custom_loss)
-    cb = OneCycleScheduler(learn, lr_max=0.001)
-    learn.callbacks.append(cb)
-    learn.fit(EPOCHS)
-    save_nn_without_embedding_weights(learn.model, "./models/Notebook_100_8.bin")
+    # logging.info("training model 8: base + jewish boost ...")
+    # weights = np.ones(len(train))
+    # weights += (iden >= 0.5).any(1)
+    # weights += (train["target"].values >= 0.5) & (iden < 0.5).any(1)
+    # weights += (train["target"].values < 0.5) & (iden >= 0.5).any(1)
+    # weights += (
+    #     (
+    #         (train["target"].values >= 0.5).astype(bool).astype(np.int)
+    #         + (train["is_idententy"].values == 1)
+    #     )
+    #     .astype(bool)
+    #     .astype(np.int)
+    # )
+    # weights += (
+    #     (train[["psychiatric_or_mental_illness"]].fillna(0).values >= 0.5)
+    #     .sum(axis=1)
+    #     .astype(bool)
+    #     .astype(np.int)
+    # )
+    # weights /= weights.mean()
+    # y_train_torch = get_y_train_torch(weights)
+    # databunch = get_databunch(y_train_torch)
+    # model = NeuralNet(embedding_matrix, output_aux_sub=subgroup_target.shape[1])
+    # learn = Learner(databunch, model, loss_func=custom_loss)
+    # cb = OneCycleScheduler(learn, lr_max=0.001)
+    # learn.callbacks.append(cb)
+    # learn.fit(EPOCHS)
+    # save_nn_without_embedding_weights(learn.model, "./models/Notebook_100_8.bin")
 
-    logging.info("training model 9: base + black boost ...")
-    weights = np.ones(len(train))
-    weights += (iden >= 0.5).any(1)
-    weights += (train["target"].values >= 0.5) & (iden < 0.5).any(1)
-    weights += (train["target"].values < 0.5) & (iden >= 0.5).any(1)
-    weights += (
-        (
-            (train["target"].values >= 0.5).astype(bool).astype(np.int)
-            + (train["is_idententy"].values == 1)
-        )
-        .astype(bool)
-        .astype(np.int)
-    )
-    weights += (
-        (train[["psychiatric_or_mental_illness"]].fillna(0).values >= 0.5)
-        .sum(axis=1)
-        .astype(bool)
-        .astype(np.int)
-    )
-    weights /= weights.mean()
-    y_train_torch = get_y_train_torch(weights)
-    databunch = get_databunch(y_train_torch)
-    model = NeuralNet(embedding_matrix, output_aux_sub=subgroup_target.shape[1])
-    learn = Learner(databunch, model, loss_func=custom_loss)
-    cb = OneCycleScheduler(learn, lr_max=0.001)
-    learn.callbacks.append(cb)
-    learn.fit(EPOCHS)
-    save_nn_without_embedding_weights(learn.model, "./models/Notebook_100_9.bin")
+    # logging.info("training model 9: base + black boost ...")
+    # weights = np.ones(len(train))
+    # weights += (iden >= 0.5).any(1)
+    # weights += (train["target"].values >= 0.5) & (iden < 0.5).any(1)
+    # weights += (train["target"].values < 0.5) & (iden >= 0.5).any(1)
+    # weights += (
+    #     (
+    #         (train["target"].values >= 0.5).astype(bool).astype(np.int)
+    #         + (train["is_idententy"].values == 1)
+    #     )
+    #     .astype(bool)
+    #     .astype(np.int)
+    # )
+    # weights += (
+    #     (train[["psychiatric_or_mental_illness"]].fillna(0).values >= 0.5)
+    #     .sum(axis=1)
+    #     .astype(bool)
+    #     .astype(np.int)
+    # )
+    # weights /= weights.mean()
+    # y_train_torch = get_y_train_torch(weights)
+    # databunch = get_databunch(y_train_torch)
+    # model = NeuralNet(embedding_matrix, output_aux_sub=subgroup_target.shape[1])
+    # learn = Learner(databunch, model, loss_func=custom_loss)
+    # cb = OneCycleScheduler(learn, lr_max=0.001)
+    # learn.callbacks.append(cb)
+    # learn.fit(EPOCHS)
+    # save_nn_without_embedding_weights(learn.model, "./models/Notebook_100_9.bin")
 
-    logging.info("training model 10: base + white boost ...")
-    weights = np.ones(len(train))
-    weights += (iden >= 0.5).any(1)
-    weights += (train["target"].values >= 0.5) & (iden < 0.5).any(1)
-    weights += (train["target"].values < 0.5) & (iden >= 0.5).any(1)
-    weights += (
-        (
-            (train["target"].values >= 0.5).astype(bool).astype(np.int)
-            + (train["is_idententy"].values == 1)
-        )
-        .astype(bool)
-        .astype(np.int)
-    )
-    weights += (
-        (train[["psychiatric_or_mental_illness"]].fillna(0).values >= 0.5)
-        .sum(axis=1)
-        .astype(bool)
-        .astype(np.int)
-    )
-    weights /= weights.mean()
-    y_train_torch = get_y_train_torch(weights)
-    databunch = get_databunch(y_train_torch)
-    model = NeuralNet(embedding_matrix, output_aux_sub=subgroup_target.shape[1])
-    learn = Learner(databunch, model, loss_func=custom_loss)
-    cb = OneCycleScheduler(learn, lr_max=0.001)
-    learn.callbacks.append(cb)
-    learn.fit(EPOCHS)
-    save_nn_without_embedding_weights(learn.model, "./models/Notebook_100_10.bin")
+    # logging.info("training model 10: base + white boost ...")
+    # weights = np.ones(len(train))
+    # weights += (iden >= 0.5).any(1)
+    # weights += (train["target"].values >= 0.5) & (iden < 0.5).any(1)
+    # weights += (train["target"].values < 0.5) & (iden >= 0.5).any(1)
+    # weights += (
+    #     (
+    #         (train["target"].values >= 0.5).astype(bool).astype(np.int)
+    #         + (train["is_idententy"].values == 1)
+    #     )
+    #     .astype(bool)
+    #     .astype(np.int)
+    # )
+    # weights += (
+    #     (train[["psychiatric_or_mental_illness"]].fillna(0).values >= 0.5)
+    #     .sum(axis=1)
+    #     .astype(bool)
+    #     .astype(np.int)
+    # )
+    # weights /= weights.mean()
+    # y_train_torch = get_y_train_torch(weights)
+    # databunch = get_databunch(y_train_torch)
+    # model = NeuralNet(embedding_matrix, output_aux_sub=subgroup_target.shape[1])
+    # learn = Learner(databunch, model, loss_func=custom_loss)
+    # cb = OneCycleScheduler(learn, lr_max=0.001)
+    # learn.callbacks.append(cb)
+    # learn.fit(EPOCHS)
+    # save_nn_without_embedding_weights(learn.model, "./models/Notebook_100_10.bin")
