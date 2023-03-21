@@ -1,6 +1,8 @@
 # Custom
 *.csv
 *.gensim
+*.gensim.vectors.npy
+*.pickle
 .DS_Store
 .vscode
 

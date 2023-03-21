@@ -3,6 +3,7 @@ import time
 import random
 import logging
 import multiprocessing
+import pickle
 
 import numpy as np
 import pandas as pd
@@ -50,6 +51,9 @@ def save_nn_without_embedding_weights(model, path: str):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    logging.info("Starting...")
+
     seed_everything(1234)
     torch.cuda.set_device(0)
 
@@ -59,14 +63,18 @@ if __name__ == "__main__":
     y = train["target"].values
 
     logging.info("Preprocessing...")
-    with multiprocessing.Pool(processes=32) as pool:
-        text_list = pool.map(normalize, train.comment_text.tolist())
+    # with multiprocessing.Pool(processes=4) as pool:
+    #     text_list = pool.map(normalize, train.comment_text.tolist())
+    # with open("../input/text_list_train.pickle", "wb") as f:
+    #     pickle.dump(text_list, f)
+    with open("../input/text_list_train.pickle", "rb") as f:
+        text_list = pickle.load(f)
 
     logging.info("Tokenization...")
     tweet_tokenizer = TweetTokenizer(strip_handles=True, reduce_len=True)
     word_sequences = []
     word_dict = {}
-    word_counter = {}
+    # word_counter = {}
     word_index = 1
 
     for doc in tqdm(text_list):
@@ -74,16 +82,16 @@ if __name__ == "__main__":
         for token in tweet_tokenizer.tokenize(doc):
             if token not in word_dict:
                 word_dict[token] = word_index
-                word_counter[token] = 1
+                # word_counter[token] = 1
                 word_index += 1
             word_seq.append(word_dict[token])
-            word_counter[token] = +1
+            # word_counter[token] = +1
         word_sequences.append(word_seq)
 
     lengths = torch.from_numpy(np.array([len(x) for x in word_sequences]))
     maxlen = lengths.max()
 
-    x_train_padded = torch.tensor(pad_sequences(word_sequences, maxlen=maxlen)).long()
+    x_train_padded = torch.IntTensor(pad_sequences(word_sequences, maxlen=maxlen))
 
     train_collator = SequenceBucketCollator(
         lambda lenghts: lenghts.max(),
@@ -96,16 +104,16 @@ if __name__ == "__main__":
     logging.info("Loading pretrained embeddings...")
 
     glove_matrix, _ = gensim_to_embedding_matrix(
-        word_dict, "../gensim-embeddings-dataset/glove.840B.300d.gensim"
+        word_dict, "../input/gensim-embeddings-dataset/glove.840B.300d.gensim"
     )
     crawl_matrix, _ = gensim_to_embedding_matrix(
-        word_dict, "../gensim-embeddings-dataset/crawl-300d-2M.gensim"
+        word_dict, "../input/gensim-embeddings-dataset/crawl-300d-2M.gensim"
     )
-    para_matrix, _ = gensim_to_embedding_matrix(
-        word_dict, "../gensim-embeddings-dataset/paragram_300_sl999.gensim"
-    )
+    # para_matrix, _ = gensim_to_embedding_matrix(
+    #     word_dict, "../input/gensim-embeddings-dataset/paragram_300_sl999.gensim"
+    # )
     w2v_matrix, _ = gensim_to_embedding_matrix(
-        word_dict, "../gensim-embeddings-dataset/GoogleNews-vectors-negative300.gensim"
+        word_dict, "../input/gensim-embeddings-dataset/GoogleNews-vectors-negative300.gensim"
     )
 
     logging.info("Buliding char matrix...")
