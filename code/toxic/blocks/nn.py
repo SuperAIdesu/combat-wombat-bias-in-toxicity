@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
-from pytorch_pretrained_bert.modeling_gpt2 import GPT2Model, GPT2PreTrainedModel
+# from pytorch_pretrained_bert.modeling_gpt2 import GPT2Model, GPT2PreTrainedModel
 
 
 LSTM_UNITS = 128
@@ -68,26 +68,26 @@ class NeuralNet(nn.Module):
         return out
 
 
-class GPT2CNN(GPT2PreTrainedModel):
-    def __init__(self, config, num_labels):
-        super().__init__(config)
-        self.transformer = GPT2Model(config)
-        self.cnn1 = nn.Conv1d(768, 256, kernel_size=3, padding=1)
-        self.cnn2 = nn.Conv1d(256, num_labels, kernel_size=3, padding=1)
+# class GPT2CNN(GPT2PreTrainedModel):
+#     def __init__(self, config, num_labels):
+#         super().__init__(config)
+#         self.transformer = GPT2Model(config)
+#         self.cnn1 = nn.Conv1d(768, 256, kernel_size=3, padding=1)
+#         self.cnn2 = nn.Conv1d(256, num_labels, kernel_size=3, padding=1)
 
-        self.apply(self.init_weights)
+#         self.apply(self.init_weights)
 
-    def forward(
-        self,
-        input_ids,
-        position_ids=None,
-        token_type_ids=None,
-        lm_labels=None,
-        past=None,
-    ):
-        x, _ = self.transformer(input_ids, position_ids, token_type_ids, past)
-        x = x.permute(0, 2, 1)
-        x = F.relu(self.cnn1(x))
-        x = self.cnn2(x)
-        output, _ = torch.max(x, 2)
-        return output
+#     def forward(
+#         self,
+#         input_ids,
+#         position_ids=None,
+#         token_type_ids=None,
+#         lm_labels=None,
+#         past=None,
+#     ):
+#         x, _ = self.transformer(input_ids, position_ids, token_type_ids, past)
+#         x = x.permute(0, 2, 1)
+#         x = F.relu(self.cnn1(x))
+#         x = self.cnn2(x)
+#         output, _ = torch.max(x, 2)
+#         return output

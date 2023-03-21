@@ -127,7 +127,7 @@ EMOJI_REGEXP = emoji.get_emoji_regexp()
 
 UNICODE_EMOJI_MY = {
     k: f" EMJ {v.strip(':').replace('_', ' ')} "
-    for k, v in emoji.UNICODE_EMOJI_ALIAS.items()
+    for k, v in emoji.UNICODE_EMOJI_ALIAS_ENGLISH.items()
 }
 
 

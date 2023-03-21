@@ -1,4 +1,4 @@
-import fastText
+import fasttext
 import numpy as np
 from gensim.models import KeyedVectors
 from nltk.stem import PorterStemmer, LancasterStemmer, SnowballStemmer
@@ -65,7 +65,7 @@ def fasttext_to_embedding_matrix(word2index, path):
     """
         path - path to binary model obtained from fasttext util
     """
-    model = fastText.load_model(path)
+    model = fasttext.load_model(path)
     embedding_matrix = construct_empty(word2index, model.get_dimension())
     for word, index in word2index.items():
         embedding_matrix[index] = model.get_word_vector(word)

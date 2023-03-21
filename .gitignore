@@ -1,5 +1,6 @@
 # Custom
 *.csv
+*.gensim
 .DS_Store
 .vscode
 
