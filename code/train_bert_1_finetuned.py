@@ -37,7 +37,7 @@ def train_bert(config: PipeLineConfig):
 
     logging.info("Tokenizing...")
 
-    with multiprocessing.Pool(processes=32) as pool:
+    with multiprocessing.Pool(processes=4) as pool:
         text_list = train.comment_text.tolist()
         sequences = pool.map(convert_line_uncased, text_list)
 
@@ -205,5 +205,6 @@ if __name__ == "__main__":
         main_loss_weight=1.0,
     )
 
-    for config in (config_1, config_2, config_3, config_4, config_5, config_6):
-        train_bert(config)
+    train_bert(config_1)
+    # for config in (config_1, config_2, config_3, config_4, config_5, config_6):
+        # train_bert(config)

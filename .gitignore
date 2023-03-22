@@ -3,8 +3,10 @@
 *.gensim
 *.gensim.vectors.npy
 *.pickle
+*.joblib
 .DS_Store
 .vscode
+events.out*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

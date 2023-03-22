@@ -1,6 +1,7 @@
 import os
 import logging
 import multiprocessing
+import pickle
 
 import numpy as np
 import pandas as pd
@@ -21,10 +22,10 @@ from toxic.utils import (
     should_decay,
 )
 from toxic.metrics import IDENTITY_COLUMNS
-from toxic.bert import convert_line_uncased, PipeLineConfig, AUX_TARGETS
+from toxic.bert import convert_line_uncased, PipeLineConfig, AUX_TARGETS, prepare_loss
 from toxic.utils import seed_everything
 
-BATCH_SIZE = 64
+BATCH_SIZE = 32
 ACCUM_STEPS = 2
 
 
@@ -37,9 +38,13 @@ def train_bert(config: PipeLineConfig):
 
     logging.info("Tokenizing...")
 
-    with multiprocessing.Pool(processes=32) as pool:
-        text_list = train.comment_text.tolist()
-        sequences = pool.map(convert_line_uncased, text_list)
+    # with multiprocessing.Pool(processes=4) as pool:
+    #     text_list = train.comment_text.tolist()
+    #     sequences = pool.map(convert_line_uncased, text_list)
+    # with open("../input/sequences_train_2.pickle", "wb") as f:
+    #     pickle.dump(sequences, f)
+    with open("../input/sequences_train_2.pickle", "rb") as f:
+        sequences = pickle.load(f)
 
     logging.info("Building ttensors for training...")
     sequences = np.array(sequences)
@@ -178,5 +183,6 @@ if __name__ == "__main__":
         main_loss_weight=0.95,
     )
 
-    for config in (config_1, config_2, config_3):
-        train_bert(config)
+    train_bert(config_1)
+    # for config in (config_1, config_2, config_3):
+    #     train_bert(config)

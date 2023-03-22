@@ -2,6 +2,7 @@ import fasttext
 import numpy as np
 from gensim.models import KeyedVectors
 from nltk.stem import PorterStemmer, LancasterStemmer, SnowballStemmer
+from joblib import dump, load
 
 PORTER_STEMMER = PorterStemmer()
 LANCASTER_STEMMER = LancasterStemmer()
@@ -47,7 +48,7 @@ def gensim_to_embedding_matrix(word2index, path):
     """
         path - path to model obtained with gensim.models.KeyedVectors.save
     """
-    model = KeyedVectors.load(path)
+    model = KeyedVectors.load(path, mmap="r")
     embedding_matrix = construct_empty(word2index, model.vector_size)
     unknown_words = []
 
@@ -80,5 +81,8 @@ def one_hot_char_embeddings(word2index, char_vectorizer):
     words = [""] * (max(word2index.values()) + 1)
     for word, i in word2index.items():
         words[i] = word
+    
+    char_vectorizer.fit(words)
+    dump(char_vectorizer, "./models/char_vectorizer.joblib")
 
     return char_vectorizer.transform(words).toarray().astype(np.float32)
