@@ -31,7 +31,7 @@ from toxic.embeddings import gensim_to_embedding_matrix, one_hot_char_embeddings
 from toxic.metrics import IDENTITY_COLUMNS
 
 
-BATCH_SIZE = 320
+BATCH_SIZE = 160
 EPOCHS = 5
 
 

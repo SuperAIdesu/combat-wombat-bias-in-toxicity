@@ -2,7 +2,7 @@ import numpy as np
 
 import torch
 from torch.utils import data
-from keras.preprocessing.sequence import pad_sequences
+from keras_preprocessing.sequence import pad_sequences
 
 
 class BasicSampler(data.Sampler):
