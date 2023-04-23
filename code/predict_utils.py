@@ -275,3 +275,100 @@ class NeuralNet(nn.Module):
         result = self.linear_out(torch.cat((hidden, aux_result, sub_result), 1))
         out = torch.cat([result, aux_result, sub_result], 1)
         return out
+
+
+def predict_transformed(text_list):
+    tknzr = TweetTokenizer(strip_handles=True, reduce_len=True)
+
+    test_word_sequences = []
+    word_dict = {}
+    word_index = 1
+
+    for doc in text_list:
+        word_seq = []
+        for token in tknzr.tokenize(doc):
+            if token not in word_dict:
+                word_dict[token] = word_index
+                word_index += 1
+            word_seq.append(word_dict[token])
+        test_word_sequences.append(word_seq)
+    
+    test_lengths = torch.from_numpy(np.array([len(x) for x in test_word_sequences]))
+    maxlen = test_lengths.max() 
+    print(f"Max len = {maxlen}")
+    maxlen = min(maxlen, 400)
+
+    class SequenceBucketCollator():
+        def __init__(self, choose_length, sequence_index, length_index, label_index=None):
+            self.choose_length = choose_length
+            self.sequence_index = sequence_index
+            self.length_index = length_index
+            self.label_index = label_index
+            
+        def __call__(self, batch):
+            batch = [torch.stack(x) for x in list(zip(*batch))]
+            
+            sequences = batch[self.sequence_index]
+            lengths = batch[self.length_index]
+            
+            length = self.choose_length(lengths)
+            mask = torch.arange(start=maxlen, end=0, step=-1) < length
+            padded_sequences = sequences[:, mask]
+            
+            batch[self.sequence_index] = padded_sequences
+            
+            if self.label_index is not None:
+                return [x for i, x in enumerate(batch) if i != self.label_index], batch[self.label_index]
+        
+            return batch
+
+    x_test_padded = torch.tensor(pad_sequences(test_word_sequences, maxlen=maxlen))
+    test_collator = SequenceBucketCollator(torch.max, sequence_index=0, length_index=1)
+
+    del text_list, test_word_sequences, tknzr
+    gc.collect()
+
+    glove_matrix, _ = gensim_to_embedding_matrix(
+        word_dict,
+        "../input/gensim-embeddings-dataset/glove.840B.300d.gensim",
+    )
+
+    crawl_matrix, _ = gensim_to_embedding_matrix(
+        word_dict, 
+        "../input/gensim-embeddings-dataset/crawl-300d-2M.gensim",
+    )
+
+    w2v_matrix, _ = gensim_to_embedding_matrix(
+        word_dict, 
+        "../input/gensim-embeddings-dataset/GoogleNews-vectors-negative300.gensim",
+    )
+
+    char_matrix = one_hot_char_embeddings(
+        word_dict,
+        joblib.load('./models/char_vectorizer.joblib'),
+    )
+
+    model_name = 'Notebook_100_5.bin'
+    embedding_matrix = np.concatenate([glove_matrix, crawl_matrix, w2v_matrix, char_matrix], axis=1)
+
+    model = NeuralNet(embedding_matrix)
+    temp_dict = torch.load('./models/' + model_name)
+    temp_dict['embedding.weight'] = torch.tensor(embedding_matrix)
+    model.load_state_dict(temp_dict)
+    model = model.cuda()
+    for param in model.parameters():
+        param.requires_grad=False
+    model = model.eval()
+
+    batch_size = 128
+    test_dataset = data.TensorDataset(x_test_padded, test_lengths)
+    test_loader = data.DataLoader(test_dataset, batch_size=batch_size, collate_fn=test_collator)
+    
+    preds = np.zeros((len(test_dataset), 18), dtype=np.float32)
+    with torch.no_grad():
+        for i, (x_batch) in enumerate(test_loader):
+            X_1 = x_batch[0].cuda()
+            y_pred = torch.sigmoid(model(X_1)).cpu().numpy()
+            preds[i * batch_size:(i + 1) * batch_size] = y_pred
+            
+    return preds

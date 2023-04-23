@@ -4,6 +4,7 @@
 *.gensim.vectors.npy
 *.pickle
 *.joblib
+*.json
 .DS_Store
 .vscode
 events.out*
