@@ -1,5 +1,4 @@
 # Custom
-*.csv
 *.gensim
 *.gensim.vectors.npy
 *.pickle
@@ -9,6 +8,8 @@
 .vscode
 events.out*
 *.bin
+input/*/*.csv
+code/models/test_*.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
