@@ -48,7 +48,7 @@ dependencies:
 
 ### Train the model
 
-The embeddings need to be downloaded from [Kaggle](https://www.kaggle.com/datasets/iezepov/gensim-embeddings-dataset) and put into `input/gensim-embeddings-dataset`. Then run the `train_lstms.py`, and verify that the model and fitted vectorizer are saved in `models/Notebook_100_5.bin` and `models/char_vectorizer.joblib`.
+The embeddings need to be downloaded from [Kaggle](https://www.kaggle.com/datasets/iezepov/gensim-embeddings-dataset) and put into `input/gensim-embeddings-dataset`. Then run the `train_lstms.py`, and verify that the model and fitted vectorizer are saved in `models/Notebook_100_5.bin` and `models/char_vectorizer.joblib`. The training process should take around 1h.
 
 ### Reproducing the `lstm_5_targets.csv` (Optional)
 
