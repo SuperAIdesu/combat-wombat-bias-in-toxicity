@@ -63,12 +63,12 @@ if __name__ == "__main__":
     y = train["target"].values
 
     logging.info("Preprocessing...")
-    # with multiprocessing.Pool(processes=4) as pool:
-    #     text_list = pool.map(normalize, train.comment_text.tolist())
+    with multiprocessing.Pool(processes=4) as pool:
+        text_list = pool.map(normalize, train.comment_text.tolist())
     # with open("../input/text_list_train.pickle", "wb") as f:
     #     pickle.dump(text_list, f)
-    with open("../input/text_list_train.pickle", "rb") as f:
-        text_list = pickle.load(f)
+    # with open("../input/text_list_train.pickle", "rb") as f:
+    #     text_list = pickle.load(f)
 
     logging.info("Tokenization...")
     tweet_tokenizer = TweetTokenizer(strip_handles=True, reduce_len=True)

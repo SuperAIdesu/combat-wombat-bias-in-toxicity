@@ -83,6 +83,6 @@ def one_hot_char_embeddings(word2index, char_vectorizer):
         words[i] = word
     
     char_vectorizer.fit(words)
-    # dump(char_vectorizer, "./models/char_vectorizer.joblib")
+    dump(char_vectorizer, "./models/char_vectorizer.joblib")
 
     return char_vectorizer.transform(words).toarray().astype(np.float32)
