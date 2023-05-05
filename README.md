@@ -2,6 +2,8 @@
 
 Here are the documentation for the audit conducted on the LSTM-based model which is part of the solution presented in the original repo. For the original repo README, see below.
 
+Before running the code, the input data need to be downloaded from [Kaggle](https://www.kaggle.com/competitions/jigsaw-unintended-bias-in-toxicity-classification/data) and put into `input/jigsaw-unintended-bias-in-toxicity-classification`.
+
 ## Notebooks for "input and output", "accuracy and fairness"
 
 Results from these sections can be reproduced on a regular computer. The prediction results for the test set are included in the repo(`code/models/lstm_5_targets.csv`), from which the results are derived.
@@ -11,7 +13,11 @@ Results from these sections can be reproduced on a regular computer. The predict
 
 ## Code for the other parts
 
-To run the code for the "interpretability" and "robustness" part, a computer with Nvidia GPU is needed. First, install the following dependencies. The use of `mamba` is recommended as the dependency resolving process can be slow due to the legacy packages used in the original solution. The correct version of cuda should also be installed.
+To run the code for the "interpretability" and "robustness" part, a computer with Nvidia GPU is needed.
+
+### Install dependencies
+
+First, install the following dependencies. The use of `mamba` is recommended as the dependency resolving process can be slow due to the legacy packages used in the original solution. The correct version of cuda should also be installed.
 
 ```
 channels:
@@ -40,6 +46,21 @@ dependencies:
   - shap
 ```
 
+### Train the model
+
+The embeddings need to be downloaded from [Kaggle](https://www.kaggle.com/datasets/iezepov/gensim-embeddings-dataset) and put into `input/gensim-embeddings-dataset`. Then run the `train_lstms.py`, and verify that the model and fitted vectorizer are saved in `models/Notebook_100_5.bin` and `models/char_vectorizer.joblib`.
+
+### Reproducing the `lstm_5_targets.csv` (Optional)
+
+Run the notebook `inference.ipynb`.
+
+### Reproducing the SHAP results
+
+Run the notebook `shap.ipynb`.
+
+### Reproducing the robustness results
+
+Run the notebook `textflint.ipynb` first, and then `textflint_pred.ipynb`.
 
 # Original solution README
 
