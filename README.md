@@ -4,12 +4,12 @@ Here are the documentation for the audit conducted on the LSTM-based model which
 
 Before running the code, the input data need to be downloaded from [Kaggle](https://www.kaggle.com/competitions/jigsaw-unintended-bias-in-toxicity-classification/data) and put into `input/jigsaw-unintended-bias-in-toxicity-classification`.
 
-## Notebooks for "input and output", "accuracy and fairness"
+## Code for "input and output", "accuracy and fairness"
 
 Results from these sections can be reproduced on a regular computer. The prediction results for the test set are included in the repo(`code/models/lstm_5_targets.csv`), from which the results are derived.
 
-+ ``
-+ `code/accuracy_fairness.ipynb`. Code for the "accuracy and fairness" section. `fairlearn` needs to be installed.
++ `jigsaw_eda.ipynb`. Code for the "input and output" section. No additional dependency needed.
++ `accuracy_fairness.ipynb`. Code for the "accuracy and fairness" section. `fairlearn` needs to be installed.
 
 ## Code for the other parts
 
