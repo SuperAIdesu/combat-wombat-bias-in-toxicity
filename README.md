@@ -1,4 +1,17 @@
-## Dependencies
+# Audit code documentation
+
+Here are the documentation for the audit conducted on the LSTM-based model which is part of the solution presented in the original repo. For the original repo README, see below.
+
+## Notebooks for "input and output", "accuracy and fairness"
+
+Results from these sections can be reproduced on a regular computer. The prediction results for the test set are included in the repo(`code/models/lstm_5_targets.csv`), from which the results are derived.
+
++ ``
++ `code/accuracy_fairness.ipynb`. Code for the "accuracy and fairness" section. `fairlearn` needs to be installed.
+
+## Code for the other parts
+
+To run the code for the "interpretability" and "robustness" part, a computer with Nvidia GPU is needed. First, install the following dependencies. The use of `mamba` is recommended as the dependency resolving process can be slow due to the legacy packages used in the original solution. The correct version of cuda should also be installed.
 
 ```
 channels:
@@ -27,7 +40,10 @@ dependencies:
   - shap
 ```
 
-# COMBAT WOMBAT [4th place solution to the Jigsaw Unintended Bias in Toxicity Classification](https://www.kaggle.com/c/jigsaw-unintended-bias-in-toxicity-classification/leaderboard)
+
+# Original solution README
+
+[4th place solution to the Jigsaw Unintended Bias in Toxicity Classification](https://www.kaggle.com/c/jigsaw-unintended-bias-in-toxicity-classification/leaderboard)
 
 You should be able to replicate the solution and retrain all the models from [our inference kernel](https://www.kaggle.com/iezepov/wombat-inference-kernel) just by running all `train_*.py` scripts. One would need to put the input data and [the embeddings dataset](https://www.kaggle.com/iezepov/gensim-embeddings-dataset) to the `input` folder.
 
